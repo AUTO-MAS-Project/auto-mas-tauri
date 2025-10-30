@@ -11,14 +11,37 @@
   line-height: 24px;
   font-weight: 400;
 
-  color: #0f0f0f;
-  background-color: #f6f6f6;
+  /* 默认主题变量 */
+  --primary-color: #1890ff;
+  --bg-color: #f6f6f6;
+  --text-color: #0f0f0f;
+  --input-bg: #ffffff;
+  --border-color: transparent;
+
+  color: var(--text-color);
+  background-color: var(--bg-color);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+}
+
+/* 浅色主题 */
+[data-theme="light"] {
+  --bg-color: #f6f6f6;
+  --text-color: #0f0f0f;
+  --input-bg: #ffffff;
+  --border-color: transparent;
+}
+
+/* 暗色主题 */
+[data-theme="dark"] {
+  --bg-color: #2f2f2f;
+  --text-color: #f6f6f6;
+  --input-bg: #0f0f0f98;
+  --border-color: transparent;
 }
 
 .container {
@@ -41,6 +64,14 @@
   filter: drop-shadow(0 0 2em #24c8db);
 }
 
+.logo.vite:hover {
+  filter: drop-shadow(0 0 2em #747bff);
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafb);
+}
+
 .row {
   display: flex;
   justify-content: center;
@@ -48,12 +79,13 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--primary-color);
   text-decoration: inherit;
 }
 
 a:hover {
-  color: #535bf2;
+  color: var(--primary-color);
+  opacity: 0.8;
 }
 
 h1 {
@@ -63,13 +95,13 @@ h1 {
 input,
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid var(--border-color);
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
+  color: var(--text-color);
+  background-color: var(--input-bg);
   transition: border-color 0.25s;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
 }
@@ -79,11 +111,12 @@ button {
 }
 
 button:hover {
-  border-color: #396cd8;
+  border-color: var(--primary-color);
 }
+
 button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
+  border-color: var(--primary-color);
+  opacity: 0.8;
 }
 
 input,
@@ -95,22 +128,3 @@ button {
   margin-right: 5px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
-}

@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* 自定义主题色变量 */
+:root {
+  --primary-color: #1890ff;
+}
+
+/* TailwindCSS 会自动处理 dark mode，通过 dark: 前缀 */
+
