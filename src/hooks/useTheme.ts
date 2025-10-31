@@ -1,20 +1,13 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
+import { UnlistenFn } from '@tauri-apps/api/event';
 
 // 前端使用的主题模式（包含auto）
 export type ThemeMode = 'auto' | 'light' | 'dark';
 
-// 发送给后端的主题模式（不包含auto）
-type BackendThemeMode = 'light' | 'dark';
-
 export interface ThemeConfig {
   mode: ThemeMode;
-  primary_color: string;
-}
-
-// 发送给后端的主题配置接口
-interface BackendThemeConfig {
-  mode: BackendThemeMode;
   primary_color: string;
 }
 
@@ -24,17 +17,14 @@ export const useTheme = () => {
     primary_color: '#1890ff',
   });
   const [loading, setLoading] = useState(true);
+  const [unlisten, setUnlisten] = useState<UnlistenFn | null>(null);
 
   // 获取主题配置
   const loadTheme = async () => {
     try {
       setLoading(true);
-      // 后端返回的是已解析的模式（light或dark），不包含auto
-      const config = await invoke<{ mode: 'light' | 'dark'; primary_color: string }>('get_theme');
-      setTheme({
-        mode: config.mode as ThemeMode, // 虽然后端不返回auto，但在前端我们仍可能需要使用auto模式
-        primary_color: config.primary_color,
-      });
+      const config = await invoke<ThemeConfig>('get_theme');
+      setTheme(config);
     } catch (error) {
       console.error('Failed to load theme:', error);
     } finally {
@@ -47,29 +37,9 @@ export const useTheme = () => {
     try {
       const updatedTheme = { ...theme, ...newTheme };
       
-      // 准备发送给后端的主题配置（必须是light或dark）
-      let backendTheme: BackendThemeConfig = {
-        mode: 'light', // 默认值
-        primary_color: updatedTheme.primary_color
-      };
-      
-      // 处理不同的主题模式
-      switch (updatedTheme.mode) {
-        case 'auto':
-          // 当使用auto模式时，根据系统偏好设置确定具体的模式
-          const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          backendTheme.mode = systemPrefersDark ? 'dark' : 'light';
-          break;
-        case 'light':
-        case 'dark':
-          // 直接使用指定的模式
-          backendTheme.mode = updatedTheme.mode;
-          break;
-      }
-      
-      await invoke('set_theme', { theme: backendTheme });
-      setTheme(updatedTheme);
-      applyTheme(updatedTheme);
+      const result = await invoke<ThemeConfig>('set_theme', { theme: updatedTheme });
+      setTheme(result);
+      applyTheme(result);
     } catch (error) {
       console.error('Failed to update theme:', error);
     }
@@ -114,6 +84,18 @@ export const useTheme = () => {
 
   useEffect(() => {
     loadTheme();
+    
+    // 监听来自后端的主题变更事件
+    listen<ThemeConfig>('theme-changed', (event) => {
+      setTheme(event.payload);
+      applyTheme(event.payload);
+    }).then(setUnlisten);
+    
+    return () => {
+      if (unlisten) {
+        unlisten();
+      }
+    };
   }, []);
 
   // 监听系统主题偏好变化
