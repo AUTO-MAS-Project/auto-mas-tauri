@@ -1,3 +1,4 @@
+/* Logo悬停效果 */
 .logo.vite:hover {
   filter: drop-shadow(0 0 2em #747bff);
 }
@@ -5,13 +6,15 @@
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafb);
 }
+
+/* 根样式和默认主题变量 */
 :root {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
 
-  /* 默认主题变量 */
+/* 默认主题变量 */
   --primary-color: #1890ff;
   --bg-color: #f6f6f6;
   --text-color: #0f0f0f;
@@ -28,7 +31,7 @@
   -webkit-text-size-adjust: 100%;
 }
 
-/* 浅色主题 */
+/* 浅色主题覆盖 */
 [data-theme="light"] {
   --bg-color: #f6f6f6;
   --text-color: #0f0f0f;
@@ -36,7 +39,7 @@
   --border-color: transparent;
 }
 
-/* 暗色主题 */
+/* 深色主题覆盖 */
 [data-theme="dark"] {
   --bg-color: #2f2f2f;
   --text-color: #f6f6f6;
@@ -44,6 +47,7 @@
   --border-color: transparent;
 }
 
+/* 主容器布局 */
 .container {
   margin: 0;
   padding-top: 10vh;
@@ -106,6 +110,7 @@ button {
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
 }
 
+/* 按钮特定样式 */
 button {
   cursor: pointer;
 }
@@ -119,6 +124,7 @@ button:active {
   opacity: 0.8;
 }
 
+/* 移除表单元素轮廓 */
 input,
 button {
   outline: none;
