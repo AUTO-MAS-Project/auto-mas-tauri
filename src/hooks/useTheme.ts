@@ -119,11 +119,21 @@ export const useTheme = () => {
     }
   }, [theme, loading]);
 
-  return {
+  // 使用主题的部分 - 提供主题状态和加载状态
+  const themeState = {
     theme,
     loading,
+  };
+
+  // 修改主题的部分 - 提供所有修改主题的方法
+  const themeActions = {
     setThemeMode,
     setPrimaryColor,
     updateTheme,
+  };
+
+  return {
+    ...themeState,
+    ...themeActions,
   };
 };

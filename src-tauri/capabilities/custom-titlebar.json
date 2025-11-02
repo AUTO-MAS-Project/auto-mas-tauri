@@ -1,0 +1,16 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "custom-titlebar",
+  "description": "Permissions for custom titlebar controls",
+  "windows": ["main", "popup-*"],
+  "permissions": [
+    "core:window:default",
+    "core:window:allow-set-title",
+    "core:window:allow-minimize",
+    "core:window:allow-maximize",
+    "core:window:allow-unmaximize",
+    "core:window:allow-close",
+    "core:window:allow-start-dragging",
+    "core:event:default"
+  ]
+}
