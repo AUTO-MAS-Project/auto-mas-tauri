@@ -16,15 +16,17 @@ pub enum ThemeMode {
 // 主题配置结构
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ThemeConfig {
-    pub mode: ThemeMode,
+    pub color_scheme: ThemeMode,
     pub primary_color: String,
+    pub theme: String,
 }
 
 impl Default for ThemeConfig {
     fn default() -> Self {
         Self {
-            mode: ThemeMode::Auto,
+            color_scheme: ThemeMode::Auto,
             primary_color: "#1890ff".to_string(),
+            theme: "default".to_string(),
         }
     }
 }

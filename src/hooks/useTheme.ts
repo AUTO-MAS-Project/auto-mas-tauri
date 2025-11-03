@@ -2,18 +2,25 @@ import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
 
-// 前端使用的主题模式（包含auto）
-export type IsDarkThemeMode = 'auto' | 'light' | 'dark';
-
+// 主题模式类型 - 自动|浅色|深色
+export type ColorSchemeMode = 'auto' | 'light' | 'dark';
+// 主题名称类型 - 浅色|深色 - 预留
+export type ThemeMode = 'light' | 'dark' | 'default';
+// 主题配置
 export interface ThemeConfig {
-    isdarkmode: IsDarkThemeMode;
+    // 主题模式 - 自动|浅色|深色
+    color_scheme: ColorSchemeMode;
+    // 主题色
     primary_color: string;
+    // 主题名称
+    theme: ThemeMode;
 }
 
 export const useTheme = () => {
     const [theme, setTheme] = useState<ThemeConfig>({
-        isdarkmode: 'auto',
+        color_scheme: 'auto',
         primary_color: '#1890ff',
+        theme: 'default',
     });
     const [loading, setLoading] = useState(true);
     const [unlisten, setUnlisten] = useState<UnlistenFn | null>(null);
@@ -46,13 +53,13 @@ export const useTheme = () => {
         }
     };
 
-    // 应用主题到 DOM (TailwindCSS dark mode)
+    // 应用主题到 DOM
     const applyTheme = (config: ThemeConfig) => {
         const root = document.documentElement;
 
         // 解析最终应用于界面的主题模式
         let resolvedMode: 'light' | 'dark' = 'light';
-        switch (config.isdarkmode) {
+        switch (config.color_scheme) {
             case 'auto':
                 resolvedMode =
                     window.matchMedia &&
@@ -62,7 +69,7 @@ export const useTheme = () => {
                 break;
             case 'light':
             case 'dark':
-                resolvedMode = config.isdarkmode;
+                resolvedMode = config.color_scheme;
                 break;
         }
 
@@ -78,13 +85,18 @@ export const useTheme = () => {
     };
 
     // 设置主题模式
-    const setThemeMode = (isdarkmode: IsDarkThemeMode) => {
-        updateTheme({ isdarkmode });
+    const setThemeMode = (color_scheme: ColorSchemeMode) => {
+        updateTheme({ color_scheme });
     };
 
     // 设置主题色
     const setPrimaryColor = (color: string) => {
         updateTheme({ primary_color: color });
+    };
+
+    // 设置主题名称
+    const setThemeName = (themeName: ThemeMode) => {
+        updateTheme({ theme: themeName });
     };
 
     useEffect(() => {
@@ -108,7 +120,7 @@ export const useTheme = () => {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         const handleChange = () => {
             // 只有在使用auto模式时才需要响应系统主题变化
-            if (!loading && theme.isdarkmode === 'auto') {
+            if (!loading && theme.color_scheme === 'auto') {
                 applyTheme(theme);
             }
         };
@@ -134,6 +146,7 @@ export const useTheme = () => {
     const themeActions = {
         setThemeMode,
         setPrimaryColor,
+        setThemeName,
         updateTheme,
     };
 
