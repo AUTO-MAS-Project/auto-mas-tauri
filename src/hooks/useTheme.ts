@@ -42,7 +42,7 @@ export const useTheme = () => {
         theme: 'default',
     });
     const [loading, setLoading] = useState(true);
-    const [unlisten, setUnlisten] = useState<UnlistenFn | null>(null);
+    const [unlistenFn, setUnlistenFn] = useState<UnlistenFn | null>(null);
 
     /**
      * 从后端加载主题配置
@@ -152,20 +152,21 @@ export const useTheme = () => {
         listen<ThemeConfig>('theme-changed', (event) => {
             setTheme(event.payload);
             applyTheme(event.payload);
-        }).then(setUnlisten);
+        }).then((unlisten) => {
+            setUnlistenFn(() => unlisten);
+        });
 
         return () => {
-            if (unlisten) {
-                unlisten();
+            if (unlistenFn) {
+                unlistenFn();
             }
         };
-    }, [unlisten]);
+    }, []);
 
     // 监听系统主题偏好变化（仅在 auto 模式下生效）
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         const handleChange = () => {
-            // 只有在使用auto模式时才需要响应系统主题变化
             if (!loading && theme.color_scheme === 'auto') {
                 applyTheme(theme);
             }
