@@ -2,20 +2,39 @@ import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
 
-// 主题模式类型 - 自动|浅色|深色
+/**
+ * 主题模式类型 - 自动|浅色|深色
+ */
 export type ColorSchemeMode = 'auto' | 'light' | 'dark';
-// 主题名称类型 - 浅色|深色 - 预留
+
+/**
+ * 主题名称类型 - 浅色|深色 - 预留
+ */
 export type ThemeMode = 'light' | 'dark' | 'default';
-// 主题配置
+
+/**
+ * 主题配置接口
+ */
 export interface ThemeConfig {
-    // 主题模式 - 自动|浅色|深色
+    /** 主题模式 - 自动|浅色|深色 */
     color_scheme: ColorSchemeMode;
-    // 主题色
+    /** 主题色 */
     primary_color: string;
-    // 主题名称
+    /** 主题名称 */
     theme: ThemeMode;
 }
 
+/**
+ * 主题 Hook
+ *
+ * 提供主题管理功能：
+ * 1. 从后端加载主题配置
+ * 2. 应用主题到 DOM
+ * 3. 监听主题变更事件
+ * 4. 提供主题修改方法
+ *
+ * @returns {Object} 返回主题状态和操作方法
+ */
 export const useTheme = () => {
     const [theme, setTheme] = useState<ThemeConfig>({
         color_scheme: 'auto',
@@ -25,7 +44,9 @@ export const useTheme = () => {
     const [loading, setLoading] = useState(true);
     const [unlisten, setUnlisten] = useState<UnlistenFn | null>(null);
 
-    // 获取主题配置
+    /**
+     * 从后端加载主题配置
+     */
     const loadTheme = async () => {
         try {
             setLoading(true);
@@ -38,7 +59,11 @@ export const useTheme = () => {
         }
     };
 
-    // 更新主题配置
+    /**
+     * 更新主题配置
+     *
+     * @param newTheme - 部分主题配置，将与现有配置合并
+     */
     const updateTheme = async (newTheme: Partial<ThemeConfig>) => {
         try {
             const updatedTheme = { ...theme, ...newTheme };
@@ -53,7 +78,15 @@ export const useTheme = () => {
         }
     };
 
-    // 应用主题到 DOM
+    /**
+     * 应用主题到 DOM
+     *
+     * 功能：
+     * 1. 根据主题模式设置 dark class
+     * 2. 设置主题色 CSS 变量
+     *
+     * @param config - 主题配置
+     */
     const applyTheme = (config: ThemeConfig) => {
         const root = document.documentElement;
 
@@ -84,21 +117,34 @@ export const useTheme = () => {
         root.style.setProperty('--primary-color', config.primary_color);
     };
 
-    // 设置主题模式
+    /**
+     * 设置主题模式
+     *
+     * @param color_scheme - 主题模式（自动|浅色|深色）
+     */
     const setThemeMode = (color_scheme: ColorSchemeMode) => {
         updateTheme({ color_scheme });
     };
 
-    // 设置主题色
+    /**
+     * 设置主题色
+     *
+     * @param color - 主题色（如 #1890ff）
+     */
     const setPrimaryColor = (color: string) => {
         updateTheme({ primary_color: color });
     };
 
-    // 设置主题名称
+    /**
+     * 设置主题名称
+     *
+     * @param themeName - 主题名称
+     */
     const setThemeName = (themeName: ThemeMode) => {
         updateTheme({ theme: themeName });
     };
 
+    // 初始化：加载主题配置并监听主题变更事件
     useEffect(() => {
         loadTheme();
 
@@ -113,9 +159,9 @@ export const useTheme = () => {
                 unlisten();
             }
         };
-    }, []);
+    }, [unlisten]);
 
-    // 监听系统主题偏好变化
+    // 监听系统主题偏好变化（仅在 auto 模式下生效）
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         const handleChange = () => {
@@ -129,7 +175,7 @@ export const useTheme = () => {
         return () => mediaQuery.removeEventListener('change', handleChange);
     }, [theme, loading]);
 
-    // 应用主题
+    // 当主题配置变化时，应用主题到 DOM
     useEffect(() => {
         if (!loading) {
             applyTheme(theme);
@@ -151,7 +197,7 @@ export const useTheme = () => {
     };
 
     return {
-        ...themeState,
-        ...themeActions,
+        themeState,
+        themeActions,
     };
 };

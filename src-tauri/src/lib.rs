@@ -1,7 +1,10 @@
 use tauri::Manager;
 
 mod theme;
-use theme::{ThemeState, get_theme, set_theme};
+use theme::{get_theme, set_theme, ThemeState};
+
+mod window;
+use window::{hide_main_window, show_main_window};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -20,7 +23,13 @@ pub fn run() {
             app.manage(ThemeState::new());
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![greet, get_theme, set_theme])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            get_theme,
+            set_theme,
+            show_main_window,
+            hide_main_window
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
