@@ -2,18 +2,23 @@ import React from 'react';
 import { ColorSchemeMode, useTheme } from '../hooks/useTheme';
 
 const SettingsPage: React.FC = () => {
-    const { theme, setThemeMode, setPrimaryColor, setThemeName } = useTheme();
+    const { themeState, themeActions } = useTheme();
+    const { theme } = themeState;
+    const { setThemeMode, setPrimaryColor, setThemeName } = themeActions;
 
     const handleThemeModeChange = (mode: ColorSchemeMode) => {
+        console.log('设置页面主题模式更改:', mode);
         setThemeMode(mode);
     };
 
     const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        console.log('设置页面颜色更改:', e.target.value);
         setPrimaryColor(e.target.value);
     };
 
     const handleThemeNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setThemeName(e.target.value);
+        console.log('设置页面主题名称更改:', e.target.value);
+        setThemeName(e.target.value as ThemeMode);
     };
 
     return (
@@ -79,6 +84,22 @@ const SettingsPage: React.FC = () => {
                         <span className="text-sm font-mono bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded text-gray-700 dark:text-gray-300">
                             {theme.primary_color}
                         </span>
+                    </div>
+                    {/* 添加预设颜色选项 */}
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        {['#1890ff', '#52c41a', '#fa8c16', '#f5222d', '#722ed1', '#13c2c2'].map((color) => (
+                            <button
+                                key={color}
+                                onClick={() => setPrimaryColor(color)}
+                                className={`w-8 h-8 rounded-full border-2 transition-all ${
+                                    theme.primary_color === color
+                                        ? 'border-gray-900 dark:border-gray-100 scale-110'
+                                        : 'border-gray-300 dark:border-gray-600 hover:scale-105'
+                                }`}
+                                style={{ backgroundColor: color }}
+                                aria-label={`选择颜色 ${color}`}
+                            />
+                        ))}
                     </div>
                 </div>
 

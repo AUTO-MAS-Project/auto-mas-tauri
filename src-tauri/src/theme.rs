@@ -48,10 +48,14 @@ impl ThemeState {
     }
 
     pub fn set_config<R: tauri::Runtime>(&self, config: ThemeConfig, app_handle: &AppHandle<R>) {
+        println!("更新主题配置: {:?}", config);
         *self.config.write() = config.clone();
         
         // 向所有窗口广播主题变更事件
-        let _ = app_handle.emit("theme-changed", &config);
+        match app_handle.emit("theme-changed", &config) {
+            Ok(_) => println!("成功发送 theme-changed 事件"),
+            Err(e) => println!("发送 theme-changed 事件失败: {}", e),
+        }
     }
 }
 
@@ -68,7 +72,10 @@ pub fn set_theme<R: tauri::Runtime>(
     state: State<ThemeState>,
     app_handle: AppHandle<R>,
 ) -> Result<ThemeConfig, String> {
+    println!("收到设置主题请求: {:?}", theme);
     state.set_config(theme.clone(), &app_handle);
     // 返回更新后的配置，让前端可以确认
-    Ok(state.get_config())
+    let config = state.get_config();
+    println!("主题设置完成，返回配置: {:?}", config);
+    Ok(config)
 }

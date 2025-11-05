@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
+import { updateCSSVariables } from '../tools/theme';
 
 /**
  * 主题模式类型 - 自动|浅色|深色
@@ -50,7 +51,9 @@ export const useTheme = () => {
     const loadTheme = async () => {
         try {
             setLoading(true);
+            console.log('正在从后端加载主题配置...');
             const config = await invoke<ThemeConfig>('get_theme');
+            console.log('成功加载主题配置:', config);
             setTheme(config);
         } catch (error) {
             console.error('Failed to load theme:', error);
@@ -67,11 +70,14 @@ export const useTheme = () => {
     const updateTheme = async (newTheme: Partial<ThemeConfig>) => {
         try {
             const updatedTheme = { ...theme, ...newTheme };
+            console.log('正在更新主题配置:', updatedTheme);
 
             const result = await invoke<ThemeConfig>('set_theme', {
                 theme: updatedTheme,
             });
+            console.log('主题配置更新成功:', result);
             setTheme(result);
+            // 确保在更新后立即应用主题
             applyTheme(result);
         } catch (error) {
             console.error('Failed to update theme:', error);
@@ -88,33 +94,9 @@ export const useTheme = () => {
      * @param config - 主题配置
      */
     const applyTheme = (config: ThemeConfig) => {
-        const root = document.documentElement;
-
-        // 解析最终应用于界面的主题模式
-        let resolvedMode: 'light' | 'dark' = 'light';
-        switch (config.color_scheme) {
-            case 'auto':
-                resolvedMode =
-                    window.matchMedia &&
-                    window.matchMedia('(prefers-color-scheme: dark)').matches
-                        ? 'dark'
-                        : 'light';
-                break;
-            case 'light':
-            case 'dark':
-                resolvedMode = config.color_scheme;
-                break;
-        }
-
-        // TailwindCSS dark mode
-        if (resolvedMode === 'dark') {
-            root.classList.add('dark');
-        } else {
-            root.classList.remove('dark');
-        }
-
-        // 设置主题色 CSS 变量
-        root.style.setProperty('--primary-color', config.primary_color);
+        console.log('正在应用主题到 DOM:', config);
+        // 使用工具函数更新CSS变量
+        updateCSSVariables(config);
     };
 
     /**
@@ -123,6 +105,7 @@ export const useTheme = () => {
      * @param color_scheme - 主题模式（自动|浅色|深色）
      */
     const setThemeMode = (color_scheme: ColorSchemeMode) => {
+        console.log('设置主题模式:', color_scheme);
         updateTheme({ color_scheme });
     };
 
@@ -132,6 +115,7 @@ export const useTheme = () => {
      * @param color - 主题色（如 #1890ff）
      */
     const setPrimaryColor = (color: string) => {
+        console.log('设置主题色:', color);
         updateTheme({ primary_color: color });
     };
 
@@ -141,15 +125,20 @@ export const useTheme = () => {
      * @param themeName - 主题名称
      */
     const setThemeName = (themeName: ThemeMode) => {
+        console.log('设置主题名称:', themeName);
         updateTheme({ theme: themeName });
     };
 
     // 初始化：加载主题配置并监听主题变更事件
     useEffect(() => {
-        loadTheme();
+        // 只有在初始加载时才从后端获取主题配置
+        if (loading) {
+            loadTheme();
+        }
 
         // 监听来自后端的主题变更事件
         listen<ThemeConfig>('theme-changed', (event) => {
+            console.log('收到主题变更事件:', event.payload);
             setTheme(event.payload);
             applyTheme(event.payload);
         }).then((unlisten) => {
@@ -161,7 +150,7 @@ export const useTheme = () => {
                 unlistenFn();
             }
         };
-    }, []);
+    }, []); // 依赖数组为空，确保只在组件首次挂载时执行一次
 
     // 监听系统主题偏好变化（仅在 auto 模式下生效）
     useEffect(() => {
@@ -171,6 +160,9 @@ export const useTheme = () => {
                 applyTheme(theme);
             }
         };
+
+        // 添加初始检查
+        handleChange();
 
         mediaQuery.addEventListener('change', handleChange);
         return () => mediaQuery.removeEventListener('change', handleChange);
